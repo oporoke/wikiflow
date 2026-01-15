@@ -34,7 +34,7 @@ export default function PageDetail({ params }: { params: { page_id: string } }) 
     setTitle(pageData?.title || 'Untitled');
     setContent(pageData?.content || '');
     setLoading(false);
-  }, [params.page_id]);
+  }, [params]);
 
   if (loading) {
     // You can add a skeleton loader here if you want
