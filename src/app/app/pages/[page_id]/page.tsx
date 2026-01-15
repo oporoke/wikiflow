@@ -16,10 +16,8 @@ import {
   MessageSquare,
   MoreVertical,
 } from 'lucide-react';
-import { Separator } from '@/components/ui/separator';
-import { findPageById } from '@/lib/data';
+import { findPageById, Page } from '@/lib/data';
 import { useEffect, useState } from 'react';
-import { Page } from '@/lib/data';
 
 export default function PageDetail({ params }: { params: { page_id: string } }) {
   const { page_id } = params;
@@ -38,7 +36,6 @@ export default function PageDetail({ params }: { params: { page_id: string } }) 
   }, [page_id]);
 
   if (loading) {
-    // You can add a skeleton loader here if you want
     return (
        <div className="flex flex-col gap-6 items-center justify-center h-full">
          <h1 className="text-2xl font-bold tracking-tight">
