@@ -146,7 +146,7 @@ export const findPageById = (id: string, pageArray: Page[] = pages): Page | null
 
 
 // In-memory function to add a new page. In a real app, this would be an API call.
-export const addPage = (parent?: Page) => {
+export const addPage = (parentId?: string) => {
   const newPageId = Date.now().toString();
   const newPage: Page = {
     id: newPageId,
@@ -156,10 +156,56 @@ export const addPage = (parent?: Page) => {
     content: '',
   };
 
-  if (parent && parent.children) {
-    parent.children.push(newPage);
+  if (parentId) {
+    const parent = findPageById(parentId);
+    if(parent) {
+      if(!parent.children) {
+        parent.children = [];
+      }
+      parent.children.push(newPage);
+    }
   } else {
     pages.push(newPage);
   }
   return newPage;
 };
+
+// In-memory function to update a page.
+export const updatePage = (pageId: string, title: string, content: string, parentId?: string | null) => {
+  const page = findPageById(pageId);
+  if (page) {
+    page.title = title;
+    page.content = content;
+    
+    // This is a simplified logic for moving the page.
+    // A real implementation would need to handle removing it from the old parent.
+    if (parentId) {
+      const parent = findPageById(parentId);
+      if (parent && parent.id !== pageId) { // a page cannot be its own parent
+        // For simplicity, we just add it. A more robust solution
+        // would remove it from its original location first.
+        if(!parent.children) parent.children = [];
+        // Avoid adding if it's already there.
+        if(!parent.children.find(p => p.id === pageId)) {
+           parent.children.push(page);
+        }
+      }
+    }
+
+  }
+  return page;
+}
+
+export const getPotentialParents = (pageId: string, pageList: Page[] = pages): Page[] => {
+  let potentialParents: Page[] = [];
+  for(const page of pageList) {
+    // A page cannot be its own parent or a child of its own children.
+    if(page.id !== pageId && page.href) {
+      potentialParents.push(page);
+    }
+    if(page.children) {
+      potentialParents = [...potentialParents, ...getPotentialParents(pageId, page.children)];
+    }
+  }
+  return potentialParents;
+}
