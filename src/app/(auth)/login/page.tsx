@@ -7,13 +7,14 @@ import {
   Card,
   CardContent,
   CardDescription,
-  CardFooter,
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Separator } from '@/components/ui/separator';
+import { useToast } from '@/hooks/use-toast';
+import { useAuth } from '@/firebase/auth/auth-context';
+import React from 'react';
 
 function GoogleIcon(props: React.SVGProps<SVGSVGElement>) {
   return (
@@ -44,33 +45,47 @@ function GoogleIcon(props: React.SVGProps<SVGSVGElement>) {
   );
 }
 
-function MicrosoftIcon(props: React.SVGProps<SVGSVGElement>) {
-  return (
-    <svg 
-      {...props}
-      xmlns="http://www.w3.org/2000/svg" 
-      viewBox="0 0 24 24" 
-      width="24" 
-      height="24"
-    >
-      <path fill="#F25022" d="M11.5,11.5H2v-9h9.5V11.5z"/>
-      <path fill="#7FBA00" d="M22,11.5h-9.5V2.5H22V11.5z"/>
-      <path fill="#00A4EF" d="M11.5,21.5H2v-9h9.5V21.5z"/>
-      <path fill="#FFB900" d="M22,21.5h-9.5v-9H22V21.5z"/>
-    </svg>
-  );
-}
-
-
 export default function LoginPage() {
   const router = useRouter();
+  const { toast } = useToast();
+  const { signInWithEmail, signInWithGoogle } = useAuth();
+  const [email, setEmail] = React.useState('');
+  const [password, setPassword] = React.useState('');
+  const [isLoading, setIsLoading] = React.useState(false);
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    // In a real app, you'd handle authentication here.
-    // For this demo, we'll just redirect to the dashboard.
-    router.push('/app/dashboard');
+    setIsLoading(true);
+    try {
+      await signInWithEmail(email, password);
+      router.push('/app/dashboard');
+    } catch (error: any) {
+      toast({
+        variant: 'destructive',
+        title: 'Login Failed',
+        description: error.message,
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
+  
+  const handleGoogleLogin = async () => {
+    setIsLoading(true);
+    try {
+      await signInWithGoogle();
+      router.push('/app/dashboard');
+    } catch (error: any) {
+      toast({
+        variant: 'destructive',
+        title: 'Google Login Failed',
+        description: error.message,
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
 
   return (
     <Card>
@@ -89,6 +104,9 @@ export default function LoginPage() {
               type="email"
               placeholder="name@example.com"
               required
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              disabled={isLoading}
             />
           </div>
           <div className="space-y-2">
@@ -101,10 +119,17 @@ export default function LoginPage() {
                 Forgot password?
               </Link>
             </div>
-            <Input id="password" type="password" required />
+            <Input 
+              id="password" 
+              type="password" 
+              required 
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              disabled={isLoading}
+            />
           </div>
-          <Button type="submit" className="w-full">
-            Log In
+          <Button type="submit" className="w-full" disabled={isLoading}>
+            {isLoading ? 'Logging in...' : 'Log In'}
           </Button>
         </form>
         <div className="relative my-6">
@@ -117,14 +142,10 @@ export default function LoginPage() {
             </span>
           </div>
         </div>
-        <div className="grid grid-cols-2 gap-4">
-          <Button variant="outline">
+        <div className="grid grid-cols-1 gap-4">
+          <Button variant="outline" onClick={handleGoogleLogin} disabled={isLoading}>
             <GoogleIcon className="mr-2 h-4 w-4" />
             Google
-          </Button>
-          <Button variant="outline">
-            <MicrosoftIcon className="mr-2 h-4 w-4" />
-            Microsoft
           </Button>
         </div>
       </CardContent>

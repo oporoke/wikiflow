@@ -30,8 +30,9 @@ import {
 } from 'lucide-react';
 import { useSidebar } from './ui/sidebar';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { pages } from '@/lib/data';
+import { useAuth } from '@/firebase/auth/auth-context';
 
 const findPath = (
   nodes: typeof pages,
@@ -53,6 +54,8 @@ const findPath = (
 
 export function AppHeader() {
   const { toggleSidebar, isMobile } = useSidebar();
+  const { logout } = useAuth();
+  const router = useRouter();
   const pathname = usePathname();
   const pageId = pathname.split('/').pop();
   let breadcrumbPath: { title: string; href?: string }[] | null = null;
@@ -61,6 +64,15 @@ export function AppHeader() {
   }
 
   const userAvatar = PlaceHolderImages.find((img) => img.id === 'user-avatar-1');
+
+  const handleLogout = async () => {
+    try {
+      await logout();
+      router.push('/login');
+    } catch (error) {
+      console.error("Failed to log out", error);
+    }
+  };
 
   return (
     <header className="sticky top-0 z-30 flex h-14 items-center gap-4 border-b bg-background px-4 sm:static sm:h-auto sm:border-0 sm:bg-transparent sm:px-6">
@@ -133,16 +145,16 @@ export function AppHeader() {
             <User className="mr-2 h-4 w-4" />
             Profile
           </DropdownMenuItem>
-          <DropdownMenuItem>
-            <Settings className="mr-2 h-4 w-4" />
-            Settings
+          <DropdownMenuItem asChild>
+             <Link href="/app/settings">
+              <Settings className="mr-2 h-4 w-4" />
+              Settings
+            </Link>
           </DropdownMenuItem>
           <DropdownMenuSeparator />
-          <DropdownMenuItem asChild>
-            <Link href="/">
+          <DropdownMenuItem onClick={handleLogout}>
               <LogOut className="mr-2 h-4 w-4" />
               Logout
-            </Link>
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>

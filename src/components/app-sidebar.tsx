@@ -2,7 +2,7 @@
 
 import * as React from 'react';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import {
   Sidebar,
   SidebarContent,
@@ -29,6 +29,7 @@ import {
   ChevronsUpDown,
   PlusCircle,
   ChevronRight,
+  LogOut,
 } from 'lucide-react';
 import { Logo } from './logo';
 import { Button } from './ui/button';
@@ -44,10 +45,19 @@ import { pages, type Page } from '@/lib/data';
 import { cn } from '@/lib/utils';
 import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
+import { useAuth } from '@/firebase/auth/auth-context';
+
 
 const NavItem = ({ item }: { item: Page }) => {
   const pathname = usePathname();
-  const [isOpen, setIsOpen] = React.useState(pathname.startsWith(item.href || item.id));
+  const [isOpen, setIsOpen] = React.useState(pathname.startsWith(item.href || `/app/pages/${item.id}`));
+
+  React.useEffect(() => {
+    if(item.children) {
+      const isActive = item.children.some(child => pathname === child.href);
+      if(isActive) setIsOpen(true);
+    }
+  }, [pathname, item.children]);
 
   if (item.children) {
     return (
@@ -93,6 +103,18 @@ const NavItem = ({ item }: { item: Page }) => {
 
 export function AppSidebar() {
   const userAvatar = PlaceHolderImages.find((img) => img.id === 'user-avatar-1');
+  const { user, logout } = useAuth();
+  const router = useRouter();
+  
+  const handleLogout = async () => {
+    try {
+      await logout();
+      router.push('/login');
+    } catch (error) {
+      console.error("Failed to log out", error);
+    }
+  };
+
   return (
     <Sidebar collapsible="icon" className="border-r">
       <SidebarHeader>
@@ -112,9 +134,11 @@ export function AppSidebar() {
               <PlusCircle className="mr-2 h-4 w-4" />
               Create Workspace
             </DropdownMenuItem>
-            <DropdownMenuItem>
-              <Settings className="mr-2 h-4 w-4" />
-              Workspace Settings
+            <DropdownMenuItem asChild>
+              <Link href="/app/settings">
+                <Settings className="mr-2 h-4 w-4" />
+                Workspace Settings
+              </Link>
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
@@ -178,13 +202,13 @@ export function AppSidebar() {
           <DropdownMenuTrigger asChild>
             <Button variant="ghost" className="w-full justify-start gap-2 h-14">
               <Avatar className="h-8 w-8">
-                <AvatarImage src={userAvatar?.imageUrl} alt="User" />
-                <AvatarFallback>U</AvatarFallback>
+                <AvatarImage src={user?.photoURL || userAvatar?.imageUrl} alt={user?.displayName || 'User'} />
+                <AvatarFallback>{user?.email?.[0].toUpperCase()}</AvatarFallback>
               </Avatar>
               <div className="text-left">
-                <p className="text-sm font-medium">John Doe</p>
-                <p className="text-xs text-muted-foreground">
-                  john.doe@example.com
+                <p className="text-sm font-medium truncate">{user?.displayName || user?.email}</p>
+                <p className="text-xs text-muted-foreground truncate">
+                  {user?.displayName ? user?.email : ''}
                 </p>
               </div>
             </Button>
@@ -196,15 +220,16 @@ export function AppSidebar() {
                 <Users className="mr-2 h-4 w-4" />
                 Profile
             </DropdownMenuItem>
-            <DropdownMenuItem>
-                <Settings className="mr-2 h-4 w-4" />
-                Settings
+            <DropdownMenuItem asChild>
+                <Link href="/app/settings">
+                    <Settings className="mr-2 h-4 w-4" />
+                    Settings
+                </Link>
             </DropdownMenuItem>
             <DropdownMenuSeparator />
-            <DropdownMenuItem asChild>
-                <Link href="/">
-                <Users className="mr-2 h-4 w-4" />
-                Logout</Link>
+            <DropdownMenuItem onClick={handleLogout}>
+                <LogOut className="mr-2 h-4 w-4" />
+                Logout
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>

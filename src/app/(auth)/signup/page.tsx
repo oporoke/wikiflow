@@ -7,12 +7,14 @@ import {
   Card,
   CardContent,
   CardDescription,
-  CardFooter,
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import React from 'react';
+import { useAuth } from '@/firebase/auth/auth-context';
+import { useToast } from '@/hooks/use-toast';
 
 function GoogleIcon(props: React.SVGProps<SVGSVGElement>) {
   return (
@@ -34,7 +36,7 @@ function GoogleIcon(props: React.SVGProps<SVGSVGElement>) {
       <path
         fill="#4CAF50"
         d="M24,44c5.166,0,9.86-1.977,13.409-5.192l-6.19-5.238C29.211,35.091,26.715,36,24,36c-5.202,0-9.619-3.317-11.283-7.946l-6.522,5.025C9.505,39.556,16.227,44,24,44z"
-      />
+      _/>
       <path
         fill="#1976D2"
         d="M43.611,20.083H42V20H24v8h11.303c-0.792,2.237-2.231,4.166-4.087,5.574l6.19,5.238C42.022,35.244,44,30.038,44,24C44,22.659,43.862,21.35,43.611,20.083z"
@@ -43,32 +45,47 @@ function GoogleIcon(props: React.SVGProps<SVGSVGElement>) {
   );
 }
 
-function MicrosoftIcon(props: React.SVGProps<SVGSVGElement>) {
-  return (
-    <svg 
-      {...props}
-      xmlns="http://www.w3.org/2000/svg" 
-      viewBox="0 0 24 24" 
-      width="24" 
-      height="24"
-    >
-      <path fill="#F25022" d="M11.5,11.5H2v-9h9.5V11.5z"/>
-      <path fill="#7FBA00" d="M22,11.5h-9.5V2.5H22V11.5z"/>
-      <path fill="#00A4EF" d="M11.5,21.5H2v-9h9.5V21.5z"/>
-      <path fill="#FFB900" d="M22,21.5h-9.5v-9H22V21.5z"/>
-    </svg>
-  );
-}
-
 export default function SignupPage() {
   const router = useRouter();
+  const { toast } = useToast();
+  const { signUpWithEmail, signInWithGoogle } = useAuth();
+  const [email, setEmail] = React.useState('');
+  const [password, setPassword] = React.useState('');
+  const [isLoading, setIsLoading] = React.useState(false);
 
-  const handleSignup = (e: React.FormEvent) => {
+  const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
-    // In a real app, you'd handle registration here.
-    // For this demo, we'll just redirect to the dashboard.
-    router.push('/app/dashboard');
+    setIsLoading(true);
+    try {
+      await signUpWithEmail(email, password);
+      router.push('/app/dashboard');
+    } catch (error: any) {
+      toast({
+        variant: 'destructive',
+        title: 'Sign-up Failed',
+        description: error.message,
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
+  
+  const handleGoogleLogin = async () => {
+    setIsLoading(true);
+    try {
+      await signInWithGoogle();
+      router.push('/app/dashboard');
+    } catch (error: any) {
+      toast({
+        variant: 'destructive',
+        title: 'Google Sign-up Failed',
+        description: error.message,
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
 
   return (
     <Card>
@@ -87,14 +104,24 @@ export default function SignupPage() {
               type="email"
               placeholder="name@example.com"
               required
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              disabled={isLoading}
             />
           </div>
           <div className="space-y-2">
             <Label htmlFor="password">Password</Label>
-            <Input id="password" type="password" required />
+            <Input 
+              id="password" 
+              type="password" 
+              required
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              disabled={isLoading}
+            />
           </div>
-          <Button type="submit" className="w-full">
-            Create Account
+          <Button type="submit" className="w-full" disabled={isLoading}>
+            {isLoading ? 'Creating Account...' : 'Create Account'}
           </Button>
         </form>
         <div className="relative my-6">
@@ -107,14 +134,10 @@ export default function SignupPage() {
             </span>
           </div>
         </div>
-        <div className="grid grid-cols-2 gap-4">
-          <Button variant="outline">
+        <div className="grid grid-cols-1 gap-4">
+          <Button variant="outline" onClick={handleGoogleLogin} disabled={isLoading}>
             <GoogleIcon className="mr-2 h-4 w-4" />
             Google
-          </Button>
-          <Button variant="outline">
-            <MicrosoftIcon className="mr-2 h-4 w-4" />
-            Microsoft
           </Button>
         </div>
       </CardContent>
