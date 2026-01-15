@@ -37,4 +37,122 @@ function GoogleIcon(props: React.SVGProps<SVGSVGElement>) {
       <path
         fill="#4CAF50"
         d="M24,44c5.166,0,9.86-1.977,13.409-5.192l-6.19-5.238C29.211,35.091,26.715,36,24,36c-5.202,0-9.619-3.317-11.283-7.946l-6.522,5.025C9.505,39.556,16.227,44,24,44z"
-      ....
+      />
+      <path
+        fill="#1976D2"
+        d="M43.611,20.083H42V20H24v8h11.303c-0.792,2.237-2.231,4.166-4.087,5.574l6.19,5.238C42.022,35.244,44,30.038,44,24C44,22.659,43.862,21.35,43.611,20.083z"
+      />
+    </svg>
+  );
+}
+
+export default function SignupPage() {
+  const router = useRouter();
+  const { toast } = useToast();
+  const { login } = useAuth();
+  const [email, setEmail] = React.useState('user@example.com');
+  const [password, setPassword] = React.useState('password');
+  const [isLoading, setIsLoading] = React.useState(false);
+
+  const handleSignup = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsLoading(true);
+    try {
+      await login(email, password);
+      router.push('/app/dashboard');
+      toast({
+        title: 'Account Created',
+        description: "You've been successfully signed up and logged in.",
+      });
+    } catch (error: any) {
+      toast({
+        variant: 'destructive',
+        title: 'Signup Failed',
+        description: error.message,
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleGoogleLogin = async () => {
+    setIsLoading(true);
+    try {
+      await login('user@google.com', 'password', true);
+      router.push('/app/dashboard');
+    } catch (error: any) {
+      toast({
+        variant: 'destructive',
+        title: 'Google Login Failed',
+        description: error.message,
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  return (
+    <Card>
+      <CardHeader className="text-center">
+        <CardTitle>Create an Account</CardTitle>
+        <CardDescription>
+          Start your journey with WikiFlow today
+        </CardDescription>
+      </CardHeader>
+      <CardContent>
+        <form onSubmit={handleSignup} className="space-y-4">
+          <div className="space-y-2">
+            <Label htmlFor="email">Email</Label>
+            <Input
+              id="email"
+              type="email"
+              placeholder="name@example.com"
+              required
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              disabled={isLoading}
+            />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="password">Password</Label>
+            <Input
+              id="password"
+              type="password"
+              required
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              disabled={isLoading}
+            />
+          </div>
+          <Button type="submit" className="w-full" disabled={isLoading}>
+            {isLoading ? 'Creating Account...' : 'Create Account'}
+          </Button>
+        </form>
+        <div className="relative my-6">
+          <div className="absolute inset-0 flex items-center">
+            <span className="w-full border-t" />
+          </div>
+          <div className="relative flex justify-center text-xs uppercase">
+            <span className="bg-card px-2 text-muted-foreground">
+              Or sign up with
+            </span>
+          </div>
+        </div>
+        <div className="grid grid-cols-1 gap-4">
+          <Button variant="outline" onClick={handleGoogleLogin} disabled={isLoading}>
+            <GoogleIcon className="mr-2 h-4 w-4" />
+            Google
+          </Button>
+        </div>
+      </CardContent>
+      <CardFooter className="justify-center">
+        <p className="text-sm text-muted-foreground">
+          Already have an account?{' '}
+          <Link href="/login" className="text-primary hover:underline">
+            Log in
+          </Link>
+        </p>
+      </CardFooter>
+    </Card>
+  );
+}

@@ -9,7 +9,7 @@ import {
 } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { FilePlus2, UserPlus, Clock } from 'lucide-react';
-import { pages, addPage } from '@/lib/data';
+import { addPage } from '@/lib/data';
 import { useRouter } from 'next/navigation';
 
 const recentPages = [
