@@ -1,9 +1,8 @@
+'use client';
+
 import {
   Card,
   CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
 } from '@/components/ui/card';
 import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
@@ -15,15 +14,45 @@ import {
   MoreVertical,
 } from 'lucide-react';
 import { Separator } from '@/components/ui/separator';
+import { findPageById } from '@/lib/data';
+import { useEffect, useState } from 'react';
 
 export default function PageDetail({ params }: { params: { page_id: string } }) {
+  const page = findPageById(params.page_id);
+  const [title, setTitle] = useState(page?.title || 'Untitled');
+  const [content, setContent] = useState(page?.content || '');
+
+  useEffect(() => {
+    const pageData = findPageById(params.page_id);
+    setTitle(pageData?.title || 'Untitled');
+    setContent(pageData?.content || '');
+  }, [params.page_id]);
+
+  if (!page) {
+     return (
+      <div className="flex flex-col gap-6 items-center justify-center h-full">
+         <h1 className="text-4xl font-bold tracking-tight">
+          Page not found
+        </h1>
+        <p className="text-muted-foreground">
+          The page you are looking for does not exist.
+        </p>
+      </div>
+    );
+  }
+
+
   return (
     <div className="grid lg:grid-cols-4 gap-8 items-start">
       <div className="lg:col-span-3 flex flex-col gap-6">
         <div className="flex items-center justify-between">
-          <h1 className="text-4xl font-bold tracking-tight">
-            Frontend Guidelines
-          </h1>
+          <input
+            type="text"
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+            className="text-4xl font-bold tracking-tight bg-transparent border-none focus:ring-0 p-0"
+            placeholder="Untitled"
+          />
           <div className="flex items-center gap-2">
             <Button variant="outline" size="sm">
               <Share2 className="mr-2 h-4 w-4" />
@@ -45,14 +74,8 @@ export default function PageDetail({ params }: { params: { page_id: string } }) 
             <Textarea
               className="min-h-[60vh] w-full resize-none border-0 p-0 shadow-none focus-visible:ring-0"
               placeholder="Start writing your document..."
-              defaultValue={`## Introduction
-
-This document outlines the frontend development guidelines for projects at Acme Inc. Adhering to these standards ensures consistency, maintainability, and quality across our applications.
-
-### Core Principles
-- **Component-Based Architecture:** We use React to build encapsulated components that manage their own state.
-- **State Management:** For complex state, we utilize Redux Toolkit for a predictable state container.
-- **Styling:** We use Tailwind CSS for utility-first styling. All colors, fonts, and spacing should adhere to the design system variables.`}
+              value={content}
+              onChange={(e) => setContent(e.target.value)}
             />
           </CardContent>
         </Card>

@@ -41,7 +41,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from './ui/dropdown-menu';
-import { pages, type Page } from '@/lib/data';
+import { pages, addPage, type Page } from '@/lib/data';
 import { cn } from '@/lib/utils';
 import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
@@ -50,8 +50,12 @@ import { useAuth } from '@/hooks/use-auth';
 
 const NavItem = ({ item }: { item: Page }) => {
   const pathname = usePathname();
-  const [isOpen, setIsOpen] = React.useState(pathname.startsWith(item.href || `/app/pages/${item.id}`));
+  // Using a state to manage open/closed status for collapsibles
+  const [isOpen, setIsOpen] = React.useState(
+    (item.children || []).some(child => pathname === child.href)
+  );
 
+  // Effect to open parent if a child route is active
   React.useEffect(() => {
     if(item.children) {
       const isActive = item.children.some(child => pathname === child.href);
@@ -105,6 +109,7 @@ export function AppSidebar() {
   const userAvatar = PlaceHolderImages.find((img) => img.id === 'user-avatar-1');
   const { user, logout } = useAuth();
   const router = useRouter();
+  const [pageList, setPageList] = React.useState(pages);
   
   const handleLogout = async () => {
     try {
@@ -112,6 +117,15 @@ export function AppSidebar() {
       router.push('/login');
     } catch (error) {
       console.error("Failed to log out", error);
+    }
+  };
+
+  const handleCreateNewPage = () => {
+    const newPage = addPage();
+    // Force a re-render by creating a new array
+    setPageList([...pages]);
+    if (newPage && newPage.href) {
+      router.push(newPage.href);
     }
   };
 
@@ -183,13 +197,13 @@ export function AppSidebar() {
         <SidebarGroup>
           <SidebarGroupLabel className="flex items-center justify-between">
             <span>Pages</span>
-            <Button variant="ghost" size="icon" className="h-6 w-6">
+            <Button variant="ghost" size="icon" className="h-6 w-6" onClick={handleCreateNewPage}>
               <PlusCircle className="h-4 w-4" />
             </Button>
           </SidebarGroupLabel>
 
           <SidebarMenu>
-            {pages.map((item) => (
+            {pageList.map((item) => (
               <SidebarMenuItem key={item.id}>
                 <NavItem item={item} />
               </SidebarMenuItem>

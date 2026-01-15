@@ -1,3 +1,5 @@
+'use client';
+
 import Link from 'next/link';
 import {
   Card,
@@ -7,6 +9,8 @@ import {
 } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { FilePlus2, UserPlus, Clock } from 'lucide-react';
+import { pages, addPage } from '@/lib/data';
+import { useRouter } from 'next/navigation';
 
 const recentPages = [
   { id: '1-1', title: 'Welcome to WikiFlow' },
@@ -15,6 +19,13 @@ const recentPages = [
 ];
 
 export default function DashboardPage() {
+  const router = useRouter();
+  const handleCreateNewPage = () => {
+    const newPage = addPage();
+    if (newPage && newPage.href) {
+      router.push(newPage.href);
+    }
+  };
   return (
     <div className="flex flex-col gap-8">
       <div>
@@ -36,9 +47,7 @@ export default function DashboardPage() {
             <p className="text-xs text-muted-foreground mb-4">
               Start documenting your ideas and knowledge.
             </p>
-            <Link href="/app/pages/1-1">
-              <Button size="sm">Create a new page</Button>
-            </Link>
+            <Button size="sm" onClick={handleCreateNewPage}>Create a new page</Button>
           </CardContent>
         </Card>
         <Card>
