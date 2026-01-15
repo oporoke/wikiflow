@@ -43,7 +43,7 @@ import {
 import { pages, type Page } from '@/lib/data';
 import { cn } from '@/lib/utils';
 import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar';
-import { PlaceHolderImages } from './lib/placeholder-images';
+import { PlaceHolderImages } from '@/lib/placeholder-images';
 
 const NavItem = ({ item }: { item: Page }) => {
   const pathname = usePathname();
