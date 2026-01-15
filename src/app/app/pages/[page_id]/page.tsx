@@ -52,12 +52,14 @@ export default function PageDetail() {
   const [selectedParent, setSelectedParent] = useState<string | null>(null);
 
   useEffect(() => {
-    setLoading(true);
-    const pageData = findPageById(page_id);
-    setPage(pageData);
-    setTitle(pageData?.title || 'Untitled');
-    setContent(pageData?.content || '');
-    setLoading(false);
+    if (page_id) {
+      setLoading(true);
+      const pageData = findPageById(page_id);
+      setPage(pageData);
+      setTitle(pageData?.title || 'Untitled');
+      setContent(pageData?.content || '');
+      setLoading(false);
+    }
   }, [page_id]);
 
   const potentialParents = useMemo(() => getPotentialParents(page_id), [page_id]);
