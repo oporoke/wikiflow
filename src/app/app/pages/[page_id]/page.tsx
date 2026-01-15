@@ -37,9 +37,11 @@ import {
 import { findPageById, updatePage, getPotentialParents, Page } from '@/lib/data';
 import { useEffect, useState, useMemo } from 'react';
 import { useToast } from '@/hooks/use-toast';
+import { useParams } from 'next/navigation';
 
-export default function PageDetail({ params }: { params: { page_id: string } }) {
-  const { page_id } = params;
+export default function PageDetail() {
+  const params = useParams();
+  const page_id = params.page_id as string;
   const { toast } = useToast();
 
   const [page, setPage] = useState<Page | null>(null);
