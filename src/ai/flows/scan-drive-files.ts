@@ -41,12 +41,13 @@ const ScanDriveFilesOutputSchema = z.object({
 export type ScanDriveFilesOutput = z.infer<typeof ScanDriveFilesOutputSchema>;
 
 export async function scanDriveFiles(): Promise<ScanDriveFilesOutput> {
-  return scanDriveFilesFlow();
+  return scanDriveFilesFlow({});
 }
 
 const scanDriveFilesPrompt = ai.definePrompt({
   name: 'scanDriveFilesPrompt',
   tools: [getDriveFilesTool],
+  input: { schema: z.object({}) },
   output: { schema: ScanDriveFilesOutputSchema },
   prompt: `You are an intelligent assistant that helps organize a user's workspace.
   
@@ -65,7 +66,7 @@ const scanDriveFilesFlow = ai.defineFlow(
     outputSchema: ScanDriveFilesOutputSchema,
   },
   async () => {
-    const { output } = await scanDriveFilesPrompt();
+    const { output } = await scanDriveFilesPrompt({});
     
     // In a real app, you might have more complex logic here to validate or merge results.
     // For now, we just return the categorized list from the LLM.
