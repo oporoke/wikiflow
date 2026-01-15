@@ -22,6 +22,7 @@ import { useEffect, useState } from 'react';
 import { Page } from '@/lib/data';
 
 export default function PageDetail({ params }: { params: { page_id: string } }) {
+  const { page_id } = params;
   const [page, setPage] = useState<Page | null>(null);
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
@@ -29,12 +30,12 @@ export default function PageDetail({ params }: { params: { page_id: string } }) 
 
   useEffect(() => {
     setLoading(true);
-    const pageData = findPageById(params.page_id);
+    const pageData = findPageById(page_id);
     setPage(pageData);
     setTitle(pageData?.title || 'Untitled');
     setContent(pageData?.content || '');
     setLoading(false);
-  }, [params]);
+  }, [page_id]);
 
   if (loading) {
     // You can add a skeleton loader here if you want
