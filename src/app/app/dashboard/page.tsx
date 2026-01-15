@@ -37,7 +37,9 @@ export default function DashboardPage() {
             <p className="text-xs text-muted-foreground mb-4">
               Start documenting your ideas and knowledge.
             </p>
-            <Button size="sm">Create a new page</Button>
+            <Link href="/app/pages/1-1">
+              <Button size="sm">Create a new page</Button>
+            </Link>
           </CardContent>
         </Card>
         <Card>
@@ -51,9 +53,11 @@ export default function DashboardPage() {
             <p className="text-xs text-muted-foreground mb-4">
               Get your team on board to start collaborating.
             </p>
-            <Button size="sm">Invite team members</Button>
+            <Link href="/app/settings?tab=members">
+              <Button size="sm">Invite team members</Button>
+            </Link>
           </CardContent>
-        </Card>
+        </card>
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Recent Pages</CardTitle>

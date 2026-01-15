@@ -1,3 +1,5 @@
+'use client';
+
 import {
   Card,
   CardContent,
@@ -9,8 +11,12 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { useSearchParams } from 'next/navigation';
 
 export default function SettingsPage() {
+  const searchParams = useSearchParams();
+  const tab = searchParams.get('tab');
+
   return (
     <div className="flex flex-col gap-8">
       <div>
@@ -19,7 +25,7 @@ export default function SettingsPage() {
           Manage your workspace settings and preferences.
         </p>
       </div>
-      <Tabs defaultValue="general" className="w-full">
+      <Tabs defaultValue={tab || "general"} className="w-full">
         <TabsList>
           <TabsTrigger value="general">General</TabsTrigger>
           <TabsTrigger value="members">Members</TabsTrigger>
