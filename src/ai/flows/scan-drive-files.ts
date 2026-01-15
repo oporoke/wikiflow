@@ -64,8 +64,7 @@ const scanDriveFilesFlow = ai.defineFlow(
     outputSchema: ScanDriveFilesOutputSchema,
   },
   async () => {
-    const llmResponse = await scanDriveFilesPrompt();
-    const output = llmResponse.output();
+    const { output } = await scanDriveFilesPrompt();
     
     // In a real app, you might have more complex logic here to validate or merge results.
     // For now, we just return the categorized list from the LLM.
