@@ -198,14 +198,28 @@ export const updatePage = (pageId: string, title: string, content: string, paren
 
 export const getPotentialParents = (pageId: string, pageList: Page[] = pages): Page[] => {
   let potentialParents: Page[] = [];
-  for(const page of pageList) {
-    // A page cannot be its own parent or a child of its own children.
-    if(page.id !== pageId && page.href) {
+  for (const page of pageList) {
+    // A page cannot be its own parent.
+    if (page.id === pageId) {
+      continue;
+    }
+
+    // A page is a potential parent if it's a "category" (has no href)
+    // or if it already has children.
+    const isCategory = !page.href || (page.children && page.children.length > 0);
+
+    if (isCategory) {
       potentialParents.push(page);
     }
-    if(page.children) {
-      potentialParents = [...potentialParents, ...getPotentialParents(pageId, page.children)];
+
+    // Recurse through children if they exist
+    if (page.children) {
+      potentialParents = [
+        ...potentialParents,
+        ...getPotentialParents(pageId, page.children),
+      ];
     }
   }
-  return potentialParents;
-}
+  // Remove duplicates that might occur from recursion logic
+  return Array.from(new Set(potentialParents.map(p => p.id))).map(id => findPageById(id)!);
+};
