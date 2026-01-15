@@ -3,6 +3,9 @@
 import {
   Card,
   CardContent,
+  CardHeader,
+  CardTitle,
+  CardDescription,
 } from '@/components/ui/card';
 import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
@@ -16,31 +19,44 @@ import {
 import { Separator } from '@/components/ui/separator';
 import { findPageById } from '@/lib/data';
 import { useEffect, useState } from 'react';
+import { Page } from '@/lib/data';
 
 export default function PageDetail({ params }: { params: { page_id: string } }) {
-  const page = findPageById(params.page_id);
-  const [title, setTitle] = useState(page?.title || 'Untitled');
-  const [content, setContent] = useState(page?.content || '');
+  const [page, setPage] = useState<Page | null>(null);
+  const [title, setTitle] = useState('');
+  const [content, setContent] = useState('');
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    setLoading(true);
     const pageData = findPageById(params.page_id);
+    setPage(pageData);
     setTitle(pageData?.title || 'Untitled');
     setContent(pageData?.content || '');
+    setLoading(false);
   }, [params.page_id]);
 
-  if (!page) {
-     return (
-      <div className="flex flex-col gap-6 items-center justify-center h-full">
-         <h1 className="text-4xl font-bold tracking-tight">
-          Page not found
+  if (loading) {
+    // You can add a skeleton loader here if you want
+    return (
+       <div className="flex flex-col gap-6 items-center justify-center h-full">
+         <h1 className="text-2xl font-bold tracking-tight">
+          Loading...
         </h1>
+      </div>
+    )
+  }
+
+  if (!page) {
+    return (
+      <div className="flex flex-col gap-6 items-center justify-center h-full">
+        <h1 className="text-4xl font-bold tracking-tight">Page not found</h1>
         <p className="text-muted-foreground">
           The page you are looking for does not exist.
         </p>
       </div>
     );
   }
-
 
   return (
     <div className="grid lg:grid-cols-4 gap-8 items-start">
@@ -50,7 +66,7 @@ export default function PageDetail({ params }: { params: { page_id: string } }) 
             type="text"
             value={title}
             onChange={(e) => setTitle(e.target.value)}
-            className="text-4xl font-bold tracking-tight bg-transparent border-none focus:ring-0 p-0"
+            className="text-4xl font-bold tracking-tight bg-transparent border-none focus:ring-0 p-0 w-full"
             placeholder="Untitled"
           />
           <div className="flex items-center gap-2">
@@ -70,9 +86,9 @@ export default function PageDetail({ params }: { params: { page_id: string } }) 
           </div>
         </div>
         <Card>
-          <CardContent className="p-6">
+          <CardContent className="p-0">
             <Textarea
-              className="min-h-[60vh] w-full resize-none border-0 p-0 shadow-none focus-visible:ring-0"
+              className="min-h-[60vh] w-full resize-none border-0 p-6 shadow-none focus-visible:ring-0"
               placeholder="Start writing your document..."
               value={content}
               onChange={(e) => setContent(e.target.value)}
@@ -86,9 +102,7 @@ export default function PageDetail({ params }: { params: { page_id: string } }) 
             <CardTitle className="text-lg flex items-center gap-2">
               <MessageSquare className="h-5 w-5" /> Comments
             </CardTitle>
-            <CardDescription>
-              Discuss and leave feedback.
-            </CardDescription>
+            <CardDescription>Discuss and leave feedback.</CardDescription>
           </CardHeader>
           <CardContent>
             <div className="text-sm text-center text-muted-foreground py-8">
