@@ -94,15 +94,15 @@ export default function PageDetail() {
     <>
       <div className="grid lg:grid-cols-4 gap-8 items-start">
         <div className="lg:col-span-3 flex flex-col gap-6">
-          <div className="flex items-center justify-between">
+          <div className="flex flex-wrap items-center justify-between gap-4">
             <input
               type="text"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
-              className="text-4xl font-bold tracking-tight bg-transparent border-none focus:ring-0 p-0 w-full"
+              className="text-2xl sm:text-3xl lg:text-4xl font-bold tracking-tight bg-transparent border-none focus:ring-0 p-0 w-full max-w-full"
               placeholder="Untitled"
             />
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 ml-auto">
               <Button
                 variant="outline"
                 size="sm"

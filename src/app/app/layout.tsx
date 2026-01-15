@@ -20,7 +20,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
 
   if (loading || !user) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
+      <div className="flex items-center justify-center min-h-screen bg-background">
         <div className="p-4 w-full max-w-6xl mx-auto">
           <div className="flex gap-4">
             <Skeleton className="h-[95vh] w-64 rounded-lg hidden md:block" />
@@ -36,7 +36,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
 
   return (
     <SidebarProvider>
-      <div className="flex min-h-screen w-full">
+      <div className="flex min-h-screen w-full bg-background">
         <AppSidebar />
         <div className="flex flex-col flex-1">
           <AppHeader />

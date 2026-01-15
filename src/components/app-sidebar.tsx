@@ -40,7 +40,6 @@ import {
 } from '@/components/ui/collapsible';
 import {
   LayoutDashboard,
-  FileText,
   Users,
   Settings,
   ChevronsUpDown,
@@ -67,15 +66,13 @@ import { useToast } from '@/hooks/use-toast';
 
 const NavItem = ({ item }: { item: Page }) => {
   const pathname = usePathname();
-  // Using a state to manage open/closed status for collapsibles
   const [isOpen, setIsOpen] = React.useState(
-    (item.children || []).some((child) => pathname === child.href)
+    (item.children || []).some((child) => pathname.startsWith(child.href || ''))
   );
 
-  // Effect to open parent if a child route is active
   React.useEffect(() => {
     if (item.children) {
-      const isActive = item.children.some((child) => pathname === child.href);
+      const isActive = item.children.some((child) => pathname.startsWith(child.href || ''));
       if (isActive) setIsOpen(true);
     }
   }, [pathname, item.children]);
@@ -152,7 +149,6 @@ export function AppSidebar() {
   const handleCreateNewPage = () => {
     const parentId = selectedParent === 'root' ? undefined : selectedParent || undefined;
     const newPage = addPage(parentId);
-    // Force a re-render by creating a new array
     setPageList([...pages]);
     if (newPage && newPage.href) {
       router.push(newPage.href);
@@ -171,11 +167,9 @@ export function AppSidebar() {
         <SidebarHeader>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="ghost" className="w-full justify-between h-12">
-                <div className="flex items-center gap-2">
-                  <Logo />
-                </div>
-                <ChevronsUpDown className="h-4 w-4 text-muted-foreground" />
+              <Button variant="ghost" className="w-full justify-start h-12 gap-2 px-2">
+                <Logo />
+                <ChevronsUpDown className="h-4 w-4 text-muted-foreground ml-auto" />
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="start" className="w-64">
@@ -197,37 +191,40 @@ export function AppSidebar() {
         <SidebarContent>
           <SidebarMenu>
             <SidebarMenuItem>
-              <Link href="/app/dashboard">
                 <SidebarMenuButton
+                  asChild
                   variant="ghost"
                   className="w-full justify-start"
                 >
-                  <LayoutDashboard className="h-4 w-4" />
-                  Dashboard
+                  <Link href="/app/dashboard">
+                    <LayoutDashboard />
+                    <span>Dashboard</span>
+                  </Link>
                 </SidebarMenuButton>
-              </Link>
             </SidebarMenuItem>
             <SidebarMenuItem>
-              <Link href="#">
                 <SidebarMenuButton
+                  asChild
                   variant="ghost"
                   className="w-full justify-start"
                 >
-                  <Users className="h-4 w-4" />
-                  Members
+                  <Link href="#">
+                    <Users />
+                    <span>Members</span>
+                  </Link>
                 </SidebarMenuButton>
-              </Link>
             </SidebarMenuItem>
             <SidebarMenuItem>
-              <Link href="/app/settings">
                 <SidebarMenuButton
+                  asChild
                   variant="ghost"
                   className="w-full justify-start"
                 >
-                  <Settings className="h-4 w-4" />
-                  Settings
+                  <Link href="/app/settings">
+                    <Settings />
+                    <span>Settings</span>
+                  </Link>
                 </SidebarMenuButton>
-              </Link>
             </SidebarMenuItem>
           </SidebarMenu>
           <SidebarSeparator />
@@ -269,7 +266,7 @@ export function AppSidebar() {
                     {user?.email?.[0].toUpperCase()}
                   </AvatarFallback>
                 </Avatar>
-                <div className="text-left">
+                <div className="text-left overflow-hidden">
                   <p className="text-sm font-medium truncate">
                     {user?.displayName || user?.email}
                   </p>

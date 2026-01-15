@@ -12,12 +12,6 @@ import { FilePlus2, UserPlus, Clock } from 'lucide-react';
 import { addPage } from '@/lib/data';
 import { useRouter } from 'next/navigation';
 
-const recentPages = [
-  { id: '1-1', title: 'Welcome to WikiFlow' },
-  { id: '2-1', title: 'Frontend Guidelines' },
-  { id: '3-1', title: 'Roadmap Q3 2024' },
-];
-
 export default function DashboardPage() {
   const router = useRouter();
   const handleCreateNewPage = () => {
