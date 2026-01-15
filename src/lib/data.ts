@@ -124,7 +124,80 @@ This document outlines the frontend development guidelines for projects at Acme 
     id: '5',
     title: 'Help & Support',
     icon: LifeBuoy,
-    href: '/app/pages/5',
+    children: [
+      {
+        id: '5-1',
+        title: 'Tester Manual',
+        icon: FileText,
+        href: '/app/pages/5-1',
+        content: `
+# WikiFlow Tester Manual
+
+Welcome to WikiFlow! This manual will guide you through the features currently available for testing. Please note that this version of the application uses in-memory data, which means **all changes will be lost when you refresh your browser or restart the application.**
+
+---
+
+## 1. Authentication
+
+The application uses a mock authentication system.
+
+### Logging In
+- You can use any email and password on the login screen. The default values are \`user@example.com\` and \`password\`.
+- You can also log in using the "Continue with Google" button, which will sign you in as a mock Google user.
+
+### Logging Out
+- You can log out at any time by clicking on your user avatar in the top-right corner and selecting "Logout".
+
+---
+
+## 2. The Dashboard
+
+The dashboard is your central hub for actions and quick access to resources.
+
+### Creating a New Page
+- Click the **"Create a new page"** button on the dashboard to instantly create a new, untitled document and be redirected to it.
+
+### Quick Links
+This section is designed to give you easy access to important resources.
+
+#### Manually Adding a Resource
+1. Click the **"Add Resource"** button.
+2. A dialog will appear. Fill in the **Title**, **URL**, and select a **Type** (Website, Google Drive Folder, or Doc).
+3. Choose an existing **Category** from the dropdown or select "Create a new category" to add a new one.
+4. Click "Add Resource" to see it appear in the list.
+
+#### Automated Drive Scanning (AI Feature)
+1. Click the **"Scan for Drive Files"** button.
+2. The system will simulate scanning a Google Drive account.
+3. An AI model will analyze the file names and automatically categorize them (e.g., into "Operations", "Marketing", etc.).
+4. The newly discovered files will be added to the "Quick Links" section under their suggested categories.
+
+---
+
+## 3. Pages
+
+This is the core of the wiki where you document knowledge.
+
+### Creating a Page
+- In addition to the dashboard button, you can create a page by clicking the **'+' icon** next to the "Pages" label in the sidebar.
+- A dialog will ask you to select a "Parent Page". Choosing "Root" places it at the top level. Selecting another page makes it a sub-page.
+
+### Editing a Page
+- Click on any page in the sidebar to navigate to it.
+- You can edit the page's **Title** by clicking on it at the top.
+- The main content area is a simple text box where you can write your notes.
+
+### Saving and Organizing
+1. After making changes, click the **"Save"** button in the top right.
+2. A dialog will appear, allowing you to confirm or change the **Parent Page**. This is how you organize pages into categories.
+3. Click **"Save Changes"**. Your content will be saved (for your current session), and the page's position in the sidebar will be updated if you changed its parent.
+
+---
+
+Thank you for testing WikiFlow! Your feedback is invaluable.
+`,
+      }
+    ]
   },
 ];
 
@@ -204,9 +277,9 @@ export const getPotentialParents = (pageId: string, pageList: Page[] = pages): P
       continue;
     }
 
-    // A page is a potential parent if it's a "category" (has no href)
-    // or if it already has children.
-    const isCategory = !page.href || (page.children && page.children.length > 0);
+    // A page is a potential parent if it already has children,
+    // or if it doesn't have an href (implying it's a container).
+    const isCategory = (page.children && page.children.length > 0) || !page.href;
 
     if (isCategory) {
       potentialParents.push(page);
@@ -214,12 +287,17 @@ export const getPotentialParents = (pageId: string, pageList: Page[] = pages): P
 
     // Recurse through children if they exist
     if (page.children) {
-      potentialParents = [
+      const childParents = getPotentialParents(pageId, page.children);
+       potentialParents = [
         ...potentialParents,
-        ...getPotentialParents(pageId, page.children),
+        ...childParents,
       ];
     }
   }
-  // Remove duplicates that might occur from recursion logic
-  return Array.from(new Set(potentialParents.map(p => p.id))).map(id => findPageById(id)!);
+  // Remove duplicates that might occur from recursion logic and filter out the page itself
+  const uniqueParents = Array.from(new Set(potentialParents.map(p => p.id)))
+    .map(id => findPageById(id)!)
+    .filter(p => p && p.id !== pageId);
+    
+  return uniqueParents;
 };
