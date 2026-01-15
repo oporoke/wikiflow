@@ -32,7 +32,7 @@ import { useSidebar } from './ui/sidebar';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
 import { usePathname, useRouter } from 'next/navigation';
 import { pages } from '@/lib/data';
-import { useAuth } from '@/firebase/auth/auth-context';
+import { useAuth } from '@/hooks/use-auth';
 
 const findPath = (
   nodes: typeof pages,

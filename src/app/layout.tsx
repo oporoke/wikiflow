@@ -1,8 +1,7 @@
 import type { Metadata } from 'next';
 import './globals.css';
 import { Toaster } from '@/components/ui/toaster';
-import { AuthProvider } from '@/firebase/auth/auth-context';
-import { FirebaseProvider } from '@/firebase/firebase-provider';
+import { AuthProvider } from '@/hooks/use-auth';
 
 export const metadata: Metadata = {
   title: 'WikiFlow',
@@ -29,12 +28,10 @@ export default function RootLayout({
         />
       </head>
       <body className="font-body antialiased">
-        <FirebaseProvider>
-          <AuthProvider>
-            {children}
-            <Toaster />
-          </AuthProvider>
-        </FirebaseProvider>
+        <AuthProvider>
+          {children}
+          <Toaster />
+        </AuthProvider>
       </body>
     </html>
   );

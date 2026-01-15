@@ -13,7 +13,7 @@ import {
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import React from 'react';
-import { useAuth } from '@/firebase/auth/auth-context';
+import { useAuth } from '@/hooks/use-auth';
 import { useToast } from '@/hooks/use-toast';
 
 function GoogleIcon(props: React.SVGProps<SVGSVGElement>) {
@@ -36,7 +36,7 @@ function GoogleIcon(props: React.SVGProps<SVGSVGElement>) {
       <path
         fill="#4CAF50"
         d="M24,44c5.166,0,9.86-1.977,13.409-5.192l-6.19-5.238C29.211,35.091,26.715,36,24,36c-5.202,0-9.619-3.317-11.283-7.946l-6.522,5.025C9.505,39.556,16.227,44,24,44z"
-      _/>
+      />
       <path
         fill="#1976D2"
         d="M43.611,20.083H42V20H24v8h11.303c-0.792,2.237-2.231,4.166-4.087,5.574l6.19,5.238C42.022,35.244,44,30.038,44,24C44,22.659,43.862,21.35,43.611,20.083z"
@@ -48,7 +48,7 @@ function GoogleIcon(props: React.SVGProps<SVGSVGElement>) {
 export default function SignupPage() {
   const router = useRouter();
   const { toast } = useToast();
-  const { signUpWithEmail, signInWithGoogle } = useAuth();
+  const { login } = useAuth();
   const [email, setEmail] = React.useState('');
   const [password, setPassword] = React.useState('');
   const [isLoading, setIsLoading] = React.useState(false);
@@ -57,7 +57,7 @@ export default function SignupPage() {
     e.preventDefault();
     setIsLoading(true);
     try {
-      await signUpWithEmail(email, password);
+      await login(email, password);
       router.push('/app/dashboard');
     } catch (error: any) {
       toast({
@@ -73,7 +73,7 @@ export default function SignupPage() {
   const handleGoogleLogin = async () => {
     setIsLoading(true);
     try {
-      await signInWithGoogle();
+      await login('user@google.com', 'password', true);
       router.push('/app/dashboard');
     } catch (error: any) {
       toast({
@@ -143,7 +143,7 @@ export default function SignupPage() {
       </CardContent>
       <CardFooter className="justify-center">
         <p className="text-sm text-muted-foreground">
-          Already have an account?{' '}
+          Already have an account?{" "}
           <Link href="/login" className="text-primary hover:underline">
             Log in
           </Link>

@@ -13,7 +13,7 @@ import {
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
-import { useAuth } from '@/firebase/auth/auth-context';
+import { useAuth } from '@/hooks/use-auth';
 import React from 'react';
 
 function GoogleIcon(props: React.SVGProps<SVGSVGElement>) {
@@ -48,16 +48,16 @@ function GoogleIcon(props: React.SVGProps<SVGSVGElement>) {
 export default function LoginPage() {
   const router = useRouter();
   const { toast } = useToast();
-  const { signInWithEmail, signInWithGoogle } = useAuth();
-  const [email, setEmail] = React.useState('');
-  const [password, setPassword] = React.useState('');
+  const { login } = useAuth();
+  const [email, setEmail] = React.useState('user@example.com');
+  const [password, setPassword] = React.useState('password');
   const [isLoading, setIsLoading] = React.useState(false);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
     try {
-      await signInWithEmail(email, password);
+      await login(email, password);
       router.push('/app/dashboard');
     } catch (error: any) {
       toast({
@@ -73,7 +73,9 @@ export default function LoginPage() {
   const handleGoogleLogin = async () => {
     setIsLoading(true);
     try {
-      await signInWithGoogle();
+      // In a real app, this would involve a popup flow.
+      // Here we simulate it for demonstration.
+      await login('user@google.com', 'password', true);
       router.push('/app/dashboard');
     } catch (error: any) {
       toast({
@@ -151,7 +153,7 @@ export default function LoginPage() {
       </CardContent>
       <CardFooter className="justify-center">
         <p className="text-sm text-muted-foreground">
-          Don't have an account?{' '}
+          Don't have an account?{" "}
           <Link href="/signup" className="text-primary hover:underline">
             Sign up
           </Link>
