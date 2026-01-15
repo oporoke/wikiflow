@@ -54,10 +54,11 @@ const findPath = (
 
 export function AppHeader() {
   const { toggleSidebar, isMobile } = useSidebar();
-  const { logout } = useAuth();
+  const { user, logout } = useAuth();
   const router = useRouter();
   const pathname = usePathname();
-  const pageId = pathname.split('/').pop();
+  const pageId = pathname.startsWith('/app/pages/') ? pathname.split('/').pop() : undefined;
+  
   let breadcrumbPath: { title: string; href?: string }[] | null = null;
   if (pageId) {
     breadcrumbPath = findPath(pages, pageId);
@@ -111,6 +112,16 @@ export function AppHeader() {
                 </BreadcrumbItem>
               </React.Fragment>
             ))}
+            {pathname.startsWith('/app/pages/') && !breadcrumbPath && (
+                 <React.Fragment>
+                    <BreadcrumbSeparator>
+                      <ChevronRight className="h-4 w-4" />
+                    </BreadcrumbSeparator>
+                    <BreadcrumbItem>
+                        <BreadcrumbPage>Untitled</BreadcrumbPage>
+                    </BreadcrumbItem>
+                </React.Fragment>
+            )}
         </BreadcrumbList>
       </Breadcrumb>
       <div className="relative ml-auto flex-1 md:grow-0">
@@ -129,7 +140,7 @@ export function AppHeader() {
             className="overflow-hidden rounded-full"
           >
             <Image
-              src={userAvatar?.imageUrl || '/placeholder-user.jpg'}
+              src={user?.photoURL || userAvatar?.imageUrl || '/placeholder-user.jpg'}
               width={36}
               height={36}
               alt="Avatar"
