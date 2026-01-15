@@ -3,3 +3,4 @@ config();
 
 import '@/ai/flows/summarize-page-content.ts';
 import '@/ai/flows/generate-page-title.ts';
+import '@/ai/flows/scan-drive-files.ts';

@@ -43,55 +43,27 @@ import {
   Users,
   Megaphone,
   PlusCircle,
+  Scan,
+  Loader,
 } from 'lucide-react';
 import { addPage } from '@/lib/data';
 import { useRouter } from 'next/navigation';
 import { useToast } from '@/hooks/use-toast';
+import { scanDriveFiles } from '@/ai/flows/scan-drive-files';
 
 const initialResourceCategories = [
   {
     id: 'operations',
     name: '01. Operations',
     icon: Users,
-    resources: [
-      {
-        title: 'Q3 Logistics Plan',
-        href: '#',
-        icon: Folder,
-        type: 'drive-folder',
-      },
-      {
-        title: 'Supplier Contracts',
-        href: '#',
-        icon: Folder,
-        type: 'drive-folder',
-      },
-      {
-        title: 'Weekly Standup Notes',
-        href: '#',
-        icon: FileText,
-        type: 'drive-doc',
-      },
-    ],
+    resources: [],
   },
   {
     id: 'marketing',
     name: '02. Marketing',
     icon: Megaphone,
     resources: [
-      {
-        title: 'Campaign Assets Q3',
-        href: '#',
-        icon: Folder,
-        type: 'drive-folder',
-      },
-      {
-        title: 'Social Media Calendar',
-        href: '#',
-        icon: FileText,
-        type: 'drive-doc',
-      },
-      {
+       {
         title: 'Brand Guidelines',
         href: '#',
         icon: Link2,
@@ -101,7 +73,7 @@ const initialResourceCategories = [
   },
 ];
 
-const iconMap = {
+const iconMap: Record<string, React.ElementType> = {
   'drive-folder': Folder,
   'drive-doc': FileText,
   'external-link': Link2,
@@ -112,6 +84,7 @@ export default function DashboardPage() {
   const { toast } = useToast();
   const [resourceCategories, setResourceCategories] = useState(initialResourceCategories);
   const [isAddResourceOpen, setIsAddResourceOpen] = useState(false);
+  const [isScanning, setIsScanning] = useState(false);
   const [newResource, setNewResource] = useState({ title: '', url: '', category: '', newCategory: '', type: 'external-link' });
 
   const handleCreateNewPage = () => {
@@ -168,6 +141,61 @@ export default function DashboardPage() {
 
     setNewResource({ title: '', url: '', category: '', newCategory: '', type: 'external-link' });
     setIsAddResourceOpen(false);
+  };
+
+  const handleScanDrive = async () => {
+    setIsScanning(true);
+    toast({
+      title: "Scanning Google Drive...",
+      description: "This may take a moment.",
+    });
+
+    try {
+      const result = await scanDriveFiles();
+
+      setResourceCategories(prevCategories => {
+        const newCategories = [...prevCategories];
+        
+        result.resources.forEach(resource => {
+          const icon = iconMap[resource.type] || Link2;
+          const newResourceItem = { title: resource.title, href: resource.url, icon, type: resource.type };
+
+          let category = newCategories.find(c => c.name.toLowerCase().includes(resource.category.toLowerCase()));
+          
+          if (category) {
+             // Avoid adding duplicates
+            if (!category.resources.some(r => r.title === newResourceItem.title)) {
+              category.resources.push(newResourceItem);
+            }
+          } else {
+            // Create a new category if it doesn't exist
+             newCategories.push({
+                id: resource.category.toLowerCase().replace(/\s/g, '-'),
+                name: resource.category,
+                icon: Users, // default icon
+                resources: [newResourceItem],
+            });
+          }
+        });
+        
+        return newCategories;
+      });
+
+      toast({
+        title: "Scan Complete",
+        description: `Found and categorized ${result.resources.length} new resources.`,
+      });
+
+    } catch (error) {
+      console.error("Failed to scan drive:", error);
+      toast({
+        variant: "destructive",
+        title: "Scan Failed",
+        description: "Could not retrieve files from Google Drive.",
+      });
+    } finally {
+      setIsScanning(false);
+    }
   };
 
 
@@ -230,10 +258,20 @@ export default function DashboardPage() {
         <div className="flex flex-col gap-4">
             <div className="flex items-center justify-between">
                 <h2 className="text-2xl font-bold tracking-tight">Quick Links</h2>
-                <Button variant="outline" size="sm" onClick={() => setIsAddResourceOpen(true)}>
-                    <PlusCircle className="mr-2 h-4 w-4" />
-                    Add Resource
-                </Button>
+                <div className="flex gap-2">
+                    <Button variant="outline" size="sm" onClick={handleScanDrive} disabled={isScanning}>
+                        {isScanning ? (
+                            <Loader className="mr-2 h-4 w-4 animate-spin" />
+                        ) : (
+                            <Scan className="mr-2 h-4 w-4" />
+                        )}
+                        Scan for Drive Files
+                    </Button>
+                    <Button variant="outline" size="sm" onClick={() => setIsAddResourceOpen(true)}>
+                        <PlusCircle className="mr-2 h-4 w-4" />
+                        Add Resource
+                    </Button>
+                </div>
             </div>
           <Card>
             <CardContent className="p-4">
@@ -251,20 +289,26 @@ export default function DashboardPage() {
                       </div>
                     </AccordionTrigger>
                     <AccordionContent>
-                      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 pt-4">
-                        {category.resources.map((resource, index) => (
-                          <Link
-                            key={index}
-                            href={resource.href}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="flex items-center gap-3 rounded-md p-3 transition-colors hover:bg-muted"
-                          >
-                            <resource.icon className="h-5 w-5 text-muted-foreground" />
-                            <span className="font-medium">{resource.title}</span>
-                          </Link>
-                        ))}
-                      </div>
+                       {category.resources.length > 0 ? (
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 pt-4">
+                            {category.resources.map((resource, index) => (
+                            <Link
+                                key={index}
+                                href={resource.href}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="flex items-center gap-3 rounded-md p-3 transition-colors hover:bg-muted"
+                            >
+                                <resource.icon className="h-5 w-5 text-muted-foreground" />
+                                <span className="font-medium">{resource.title}</span>
+                            </Link>
+                            ))}
+                        </div>
+                        ) : (
+                           <div className="text-sm text-center text-muted-foreground py-4">
+                                No resources in this category yet.
+                           </div>
+                        )}
                     </AccordionContent>
                   </AccordionItem>
                 ))}
