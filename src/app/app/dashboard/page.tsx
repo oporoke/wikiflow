@@ -72,18 +72,9 @@ export default function DashboardPage() {
             <Clock className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <ul className="space-y-2">
-              {recentPages.map((page) => (
-                <li key={page.id}>
-                  <Link
-                    href={`/app/pages/${page.id}`}
-                    className="text-sm text-primary hover:underline"
-                  >
-                    {page.title}
-                  </Link>
-                </li>
-              ))}
-            </ul>
+             <p className="text-xs text-muted-foreground">
+              Your recently viewed pages will appear here.
+            </p>
           </CardContent>
         </Card>
       </div>
