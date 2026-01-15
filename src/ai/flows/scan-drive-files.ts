@@ -61,6 +61,7 @@ const scanDriveFilesPrompt = ai.definePrompt({
 const scanDriveFilesFlow = ai.defineFlow(
   {
     name: 'scanDriveFilesFlow',
+    inputSchema: z.object({}),
     outputSchema: ScanDriveFilesOutputSchema,
   },
   async () => {
